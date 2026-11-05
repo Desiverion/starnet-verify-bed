@@ -43,8 +43,8 @@ DEFAULT_TARGET = os.path.join(
 )
 
 ID_ATTR_RE = re.compile(r"""\bid\s*=\s*(?:"([^"]*)"|'([^']*)')""", re.IGNORECASE)
-SPAN_ID_RE = re.compile(
-    r"""<span\b[^>]*\bid\s*=\s*(?:"([^"]*)"|'([^']*)')""", re.IGNORECASE
+OUTPUT_EL_RE = re.compile(
+    r"""<(?:output|span)\b[^>]*\bid\s*=\s*(?:"([^"]*)"|'([^']*)')""", re.IGNORECASE
 )
 LABEL_FOR_RE = re.compile(
     r"""<label\b[^>]*\bfor\s*=\s*(?:"([^"]*)"|'([^']*)')""", re.IGNORECASE
@@ -83,12 +83,18 @@ def audit(path):
     if not out_ids:
         failures.append("no id attribute contains the substring 'out-'")
 
-    # 2. Output spans: <span id="...out-...">.
-    span_ids = [_val(m) for m in SPAN_ID_RE.finditer(html)]
-    span_out_ids = [i for i in span_ids if "out-" in i]
-    print("Output spans (<span id=...out-...>): %d" % len(span_out_ids))
-    if not span_out_ids:
-        failures.append("no <span> carries an id containing 'out-'")
+    # 2. Output elements: an <output> or <span> carrying an out- id.
+    elem_ids = [_val(m) for m in OUTPUT_EL_RE.finditer(html)]
+    elem_out_ids = [i for i in elem_ids if "out-" in i]
+    print("Output elements (<output>/<span> with an out- id): %d" % len(elem_out_ids))
+    if not elem_out_ids:
+        failures.append("no <output> or <span> carries an id containing 'out-'")
+    missing_elements = [i for i in out_ids if i not in elem_out_ids]
+    if missing_elements:
+        failures.append(
+            "out- ids not carried by a visible output element: %s"
+            % ", ".join(missing_elements)
+        )
 
     # 3. Input labels.
     label_targets = set(_val(m) for m in LABEL_FOR_RE.finditer(html))
@@ -142,9 +148,9 @@ def audit(path):
 
     print("RESULT: PASS")
     print(
-        "  reason: %d output ids, %d output spans, %d row labels, aria-live present, "
+        "  reason: %d output ids, %d output elements, %d row labels, aria-live present, "
         "1 input listener, balanced JS braces, 0 external references"
-        % (len(out_ids), len(span_out_ids), row_labels)
+        % (len(out_ids), len(elem_out_ids), row_labels)
     )
     return 0
 
