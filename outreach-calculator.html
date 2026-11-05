@@ -160,6 +160,7 @@
 
   function fmtCount(n) {
     if (!isFinite(n)) n = 0;
+    if (n === 0) return "0";
     var abs = Math.abs(n);
     var digits = abs >= 10 ? 0 : 1;
     return n.toLocaleString("en-US", {
