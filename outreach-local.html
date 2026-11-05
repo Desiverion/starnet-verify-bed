@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cold Email Outreach Calculator</title>
+<style>
+  :root {
+    --ink: #14161a;
+    --muted: #5a616b;
+    --line: #d9dde3;
+    --bg: #ffffff;
+    --panel: #f6f7f9;
+    --accent: #1f4e79;
+    --warn-bg: #fdf7e6;
+    --warn-line: #e3c97a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 24px 16px 64px;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; }
+  h1 { font-size: 1.6rem; margin: 0 0 4px; letter-spacing: -0.01em; }
+  .lede { color: var(--muted); margin: 0 0 24px; max-width: 60ch; }
+  h2 { font-size: 1.05rem; margin: 32px 0 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+  .grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
+  @media (min-width: 640px) { .grid { grid-template-columns: 1fr 1fr; } }
+  .field { display: block; }
+  .field label { display: block; font-weight: 600; margin-bottom: 4px; }
+  .field .hint { display: block; font-weight: 400; color: var(--muted); font-size: 0.85rem; margin-bottom: 6px; }
+  .field input {
+    width: 100%;
+    padding: 9px 10px;
+    font: inherit;
+    color: inherit;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+  }
+  .field input:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
+  .results { border-top: 1px solid var(--line); margin-top: 8px; }
+  .row { border-bottom: 1px solid var(--line); padding: 14px 0; }
+  .row-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px; }
+  .row-label { font-weight: 600; }
+  .row output { font-variant-numeric: tabular-nums; font-size: 1.25rem; font-weight: 700; color: var(--accent); }
+  .row p { margin: 6px 0 0; color: var(--muted); font-size: 0.9rem; max-width: 62ch; }
+  .assumptions {
+    margin-top: 36px;
+    padding: 16px 18px;
+    background: var(--warn-bg);
+    border: 1px solid var(--warn-line);
+    border-radius: 8px;
+  }
+  .assumptions h2 { margin: 0 0 8px; color: #7a5c12; }
+  .assumptions p { margin: 0 0 8px; font-size: 0.92rem; }
+  .assumptions ul { margin: 0; padding-left: 20px; font-size: 0.92rem; }
+  .assumptions li { margin-bottom: 3px; }
+  .assumptions .strong { font-weight: 700; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Cold Email Outreach Calculator</h1>
+  <p class="lede">Enter your own numbers. The calculator turns them into deliverable contacts, replies, meetings, deals and revenue. It changes nothing until you type in it, and it stores nothing.</p>
+
+  <h2>Your inputs</h2>
+  <div class="grid">
+
+    <div class="field">
+      <label for="leads">Leads per month
+        <span class="hint">How many addresses you load into the sender each month.</span>
+      </label>
+      <input type="number" id="leads" name="leads" value="1000" min="0" step="1" inputmode="numeric">
+    </div>
+
+    <div class="field">
+      <label for="deliverability">Deliverability rate (%)
+        <span class="hint">Share of sends that reach an inbox rather than bouncing or landing in spam.</span>
+      </label>
+      <input type="number" id="deliverability" name="deliverability" value="95" min="0" max="100" step="0.1" inputmode="decimal">
+    </div>
+
+    <div class="field">
+      <label for="posreply">Positive reply rate (%)
+        <span class="hint">Share of delivered emails that get a positive reply, not just any reply.</span>
+      </label>
+      <input type="number" id="posreply" name="posreply" value="5" min="0" max="100" step="0.1" inputmode="decimal">
+    </div>
+
+    <div class="field">
+      <label for="meetingrate">Meeting booked rate from positive replies (%)
+        <span class="hint">Out of every 100 positive replies, how many turn into a booked call.</span>
+      </label>
+      <input type="number" id="meetingrate" name="meetingrate" value="30" min="0" max="100" step="0.1" inputmode="decimal">
+    </div>
+
+    <div class="field">
+      <label for="closerate">Close rate on meetings (%)
+        <span class="hint">Out of every 100 meetings held, how many become paying clients. Default is 20.</span>
+      </label>
+      <input type="number" id="closerate" name="closerate" value="20" min="0" max="100" step="0.1" inputmode="decimal">
+    </div>
+
+    <div class="field">
+      <label for="dealsize">Average deal size ($)
+        <span class="hint">What one closed client is worth to you, in total contract value.</span>
+      </label>
+      <input type="number" id="dealsize" name="dealsize" value="2000" min="0" step="1" inputmode="decimal">
+    </div>
+
+    <div class="field">
+      <label for="sendingcost">Current monthly sending cost ($)
+        <span class="hint">What you pay per month for inboxes, domains, warmup and sending software.</span>
+      </label>
+      <input type="number" id="sendingcost" name="sendingcost" value="300" min="0" step="1" inputmode="decimal">
+    </div>
+
+  </div>
+
+  <h2>What your numbers produce</h2>
+  <div class="results" id="results" aria-live="polite" aria-atomic="true">
+
+    <div class="row">
+      <div class="row-head">
+        <span class="row-label">Deliverable contacts</span>
+        <output id="out-deliverable" for="leads deliverability">0</output>
+      </div>
+      <p>How many of your monthly leads actually reach an inbox after deliverability is applied. This is the real size of your audience.</p>
+    </div>
+
+    <div class="row">
+      <div class="row-head">
+        <span class="row-label">Positive replies</span>
+        <output id="out-posreplies" for="leads deliverability posreply">0</output>
+      </div>
+      <p>How many people reply in a way that shows interest. This is what most cold email reporting misses by counting all replies together.</p>
+    </div>
+
+    <div class="row">
+      <div class="row-head">
+        <span class="row-label">Meetings booked</span>
+        <output id="out-meetings" for="leads deliverability posreply meetingrate">0</output>
+      </div>
+      <p>How many calls land on your calendar once positive replies are converted into booked meetings.</p>
+    </div>
+
+    <div class="row">
+      <div class="row-head">
+        <span class="row-label">Closed deals</span>
+        <output id="out-deals" for="leads deliverability posreply meetingrate closerate">0</output>
+      </div>
+      <p>How many meetings turn into paying clients at your stated close rate. This is the number that pays you.</p>
+    </div>
+
+    <div class="row">
+      <div class="row-head">
+        <span class="row-label">Monthly revenue</span>
+        <output id="out-revenue" for="leads deliverability posreply meetingrate closerate dealsize">$0</output>
+      </div>
+      <p>Closed deals multiplied by average deal size. This is new contract value added per month, not cash collected this month.</p>
+    </div>
+
+    <div class="row">
+      <div class="row-head">
+        <span class="row-label">Cost per meeting</span>
+        <output id="out-costpermeeting" for="sendingcost leads deliverability posreply meetingrate">n/a</output>
+      </div>
+      <p>Your monthly sending cost divided by meetings booked. It tells you what one conversation costs you to buy.</p>
+    </div>
+
+    <div class="row">
+      <div class="row-head">
+        <span class="row-label">Revenue per meeting</span>
+        <output id="out-revpermeeting" for="dealsize closerate leads deliverability posreply meetingrate">n/a</output>
+      </div>
+      <p>Monthly revenue divided by meetings booked. Compare it against cost per meeting to see whether a meeting is worth buying at all.</p>
+    </div>
+
+  </div>
+
+  <div class="assumptions">
+    <h2>Assumptions, read this before you trust a number</h2>
+    <p class="strong">These outputs are arithmetic on your own inputs. They are not a forecast and they are not a promise of income.</p>
+    <p>Defaults loaded on this page:</p>
+    <ul>
+      <li>Leads per month: 1000</li>
+      <li>Deliverability rate: 95%</li>
+      <li>Positive reply rate: 5%</li>
+      <li>Meeting booked rate from positive replies: 30%</li>
+      <li>Close rate on meetings: 20%</li>
+      <li>Average deal size: $2,000</li>
+      <li>Current monthly sending cost: $300</li>
+    </ul>
+    <p>Every one of those defaults is an assumption, not a measurement of your business. Real reply rates move with your list, your offer, your domain reputation and the month. Change the inputs to your own observed numbers. If you have no observed numbers yet, treat the result as a guess and test for one month before you plan around it.</p>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var FIELDS = ['leads', 'deliverability', 'posreply', 'meetingrate', 'closerate', 'dealsize', 'sendingcost'];
+  var PERCENTS = { deliverability: 1, posreply: 1, meetingrate: 1, closerate: 1 };
+
+  function el(id) {
+    return document.getElementById(id);
+  }
+
+  function num(id) {
+    var v = parseFloat(el(id).value);
+    if (isNaN(v) || v < 0) {
+      return 0;
+    }
+    if (PERCENTS[id] && v > 100) {
+      return 100;
+    }
+    return v;
+  }
+
+  function count(n) {
+    return n.toLocaleString('en-US', { maximumFractionDigits: 1 });
+  }
+
+  function money(n) {
+    return '$' + n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+  }
+
+  function moneyFine(n) {
+    var digits = n > 0 && n < 10 ? 2 : 0;
+    return '$' + n.toLocaleString('en-US', {
+      minimumFractionDigits: digits,
+      maximumFractionDigits: digits
+    });
+  }
+
+  function update() {
+    var leads = num('leads');
+    var deliverable = leads * num('deliverability') / 100;
+    var posReplies = deliverable * num('posreply') / 100;
+    var meetings = posReplies * num('meetingrate') / 100;
+    var deals = meetings * num('closerate') / 100;
+    var revenue = deals * num('dealsize');
+    var cost = num('sendingcost');
+
+    el('out-deliverable').textContent = count(deliverable);
+    el('out-posreplies').textContent = count(posReplies);
+    el('out-meetings').textContent = count(meetings);
+    el('out-deals').textContent = count(deals);
+    el('out-revenue').textContent = money(revenue);
+
+    if (meetings > 0) {
+      el('out-costpermeeting').textContent = moneyFine(cost / meetings);
+      el('out-revpermeeting').textContent = moneyFine(revenue / meetings);
+    } else {
+      el('out-costpermeeting').textContent = 'n/a';
+      el('out-revpermeeting').textContent = 'n/a';
+    }
+  }
+
+  for (var i = 0; i < FIELDS.length; i++) {
+    el(FIELDS[i]).addEventListener('input', update);
+  }
+
+  update();
+})();
+</script>
+</body>
+</html>
