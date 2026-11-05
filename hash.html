@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="utf-8"><title>hash</title></head>
+<body>
+<pre id="log">running</pre>
+<script>
+(function () {
+  'use strict';
+  var SOURCE = 'https://raw.githubusercontent.com/Desiverion/starnet-verify-bed/main/outreach-calculator.html';
+  var EXPECT = 'c54d4feacfa97765db0bb5f2331d3544ed23d2169442760b3f8a0b6f9a39ea64';
+  var log = document.getElementById('log');
+  fetch(SOURCE).then(function (r) { return r.arrayBuffer(); }).then(function (buf) {
+    return crypto.subtle.digest('SHA-256', buf).then(function (d) {
+      var bytes = new Uint8Array(d);
+      var hex = '';
+      for (var i = 0; i < bytes.length; i++) {
+        hex += ('0' + bytes[i].toString(16)).slice(-2);
+      }
+      log.textContent = 'deployed bytes: ' + buf.byteLength + '\n'
+        + 'deployed sha256: ' + hex + '\n'
+        + 'workspace sha256: ' + EXPECT + '\n'
+        + 'IDENTICAL: ' + (hex === EXPECT);
+    });
+  }).catch(function (e) { log.textContent = 'ERROR: ' + e.message; });
+})();
+</script>
+</body>
+</html>
