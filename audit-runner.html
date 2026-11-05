@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Audit runner (Pyodide / real CPython)</title>
+<style>
+body{font-family:ui-monospace,Consolas,monospace;background:#0b0b0e;color:#e7e5e0;padding:20px}
+pre{white-space:pre-wrap;font-size:13px;line-height:1.45}
+</style>
+</head>
+<body>
+<h1 style="font-size:14px;font-family:system-ui">audit-outreach-calculator.py executed in Pyodide (CPython WASM)</h1>
+<pre id="out">loading python runtime...</pre>
+<script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
+<script>
+(async function () {
+  var out = document.getElementById('out');
+  var log = [];
+  function put(s) { log.push(s); out.textContent = log.join('\n'); }
+
+  var SCRIPT_URL = 'audit-outreach-calculator.py';
+  var PAGE_URL   = 'outreach-local.html';
+
+  try {
+    var py = await loadPyodide();
+    put('python: ' + py.runPython('import sys; sys.version'));
+    put('');
+
+    var scriptSrc = await (await fetch(SCRIPT_URL)).text();
+    var pageSrc   = await (await fetch(PAGE_URL)).text();
+    put('script bytes : ' + scriptSrc.length);
+    put('page bytes   : ' + pageSrc.length);
+
+    py.FS.writeFile('/audit-outreach-calculator.py', scriptSrc);
+    py.FS.writeFile('/outreach-calculator.html', pageSrc);
+
+    put('page sha256  : ' + py.runPython(
+      'import hashlib; hashlib.sha256(open("/outreach-calculator.html","rb").read()).hexdigest()'
+    ));
+    put('');
+
+    var result = py.runPython(`
+import io, sys, runpy, contextlib
+sys.argv = ["audit-outreach-calculator.py", "/outreach-calculator.html"]
+buf = io.StringIO()
+code = None
+with contextlib.redirect_stdout(buf):
+    try:
+        runpy.run_path("/audit-outreach-calculator.py", run_name="__main__")
+    except SystemExit as e:
+        code = e.code
+buf.getvalue() + "EXIT_CODE=%r" % (code,)
+`);
+    put(result);
+    put('');
+    put('DONE');
+  } catch (err) {
+    put('RUNNER ERROR: ' + (err && err.message ? err.message : String(err)));
+  }
+})();
+</script>
+</body>
+</html>
