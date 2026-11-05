@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>calculator harness</title>
+</head>
+<body>
+<pre id="log">running</pre>
+<script>
+(function () {
+  'use strict';
+  var SOURCE = 'https://raw.githubusercontent.com/Desiverion/starnet-verify-bed/main/outreach-calculator.html';
+  var log = document.getElementById('log');
+  var lines = [];
+
+  function say(s) { lines.push(s); log.textContent = lines.join('\n'); }
+
+  function setInputs(html, values) {
+    var keys = Object.keys(values);
+    for (var i = 0; i < keys.length; i++) {
+      var k = keys[i];
+      var re = new RegExp('id="' + k + '"[^>]*value="[^"]*"');
+      html = html.replace(re, 'id="' + k + '" value="' + values[k] + '"');
+    }
+    return html;
+  }
+
+  function runCase(name, values, expected) {
+    return fetch(SOURCE)
+      .then(function (r) { return r.text(); })
+      .then(function (text) {
+        var body = setInputs(text, values);
+        var m = body.match(/<script>([\s\S]*?)<\/script>/);
+        if (!m) { throw new Error('no script block found'); }
+        var host = document.createElement('div');
+        host.innerHTML = body.replace(/<script>[\s\S]*?<\/script>/, '');
+        document.body.appendChild(host);
+        var fn = new Function(m[1]);
+        fn();
+        var ids = ['out-deliverable', 'out-posreplies', 'out-meetings', 'out-deals', 'out-revenue', 'out-costpermeeting', 'out-revpermeeting'];
+        var got = ids.map(function (id) {
+          var e = host.querySelector('#' + id);
+          return id + '=' + (e ? e.textContent : 'MISSING');
+        }).join(' | ');
+        var ok = true;
+        var ek = Object.keys(expected);
+        for (var j = 0; j < ek.length; j++) {
+          var el2 = host.querySelector('#' + ek[j]);
+          if (!el2 || el2.textContent !== expected[ek[j]]) { ok = false; }
+        }
+        say(name + ': ' + (ok ? 'PASS' : 'FAIL'));
+        say('  ' + got);
+        host.remove();
+        return ok;
+      });
+  }
+
+  var all = true;
+  runCase('defaults', {}, {
+    'out-deliverable': '950',
+    'out-posreplies': '47.5',
+    'out-meetings': '14.3',
+    'out-deals': '2.9',
+    'out-revenue': '$5,700',
+    'out-costpermeeting': '$21',
+    'out-revpermeeting': '$400'
+  }).then(function (ok) {
+    all = all && ok;
+    return runCase('sub-ten cost per meeting (cost=30)', { sendingcost: '30' }, {
+      'out-costpermeeting': '$2.10'
+    });
+  }).then(function (ok) {
+    all = all && ok;
+    return runCase('percent clamp (deliverability=150)', { deliverability: '150' }, {
+      'out-deliverable': '1,000',
+      'out-revenue': '$6,000'
+    });
+  }).then(function (ok) {
+    all = all && ok;
+    return runCase('zero meetings guard (posreply=0)', { posreply: '0' }, {
+      'out-costpermeeting': 'n/a',
+      'out-revpermeeting': 'n/a'
+    });
+  }).then(function (ok) {
+    all = all && ok;
+    say(all ? 'ALL CASES PASS' : 'SOME CASES FAILED');
+  }).catch(function (e) {
+    say('ERROR: ' + e.message);
+  });
+})();
+</script>
+</body>
+</html>
