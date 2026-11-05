@@ -219,7 +219,7 @@
     set("outClients", fmtCount(clientsMonth), false);
     set("outMonthly", fmtMoney(monthlyRevenue), false);
     set("outAnnual", fmtMoney(annualRevenue), false);
-    set("outLifetime", fmtMoney(lifetimeAddedSafe(monthlyRevenue, lifetime)), false);
+    set("outLifetime", fmtMoney(lifetimeValue), false);
     set("outCost", fmtMoney(costMonth), true);
     set("outNet", fmtMoney(net), net < 0);
     set("outPerThousand", fmtMoney(perThousand), false);
@@ -254,10 +254,6 @@
 
     var vnode = el("verdict");
     if (vnode) vnode.textContent = verdict;
-  }
-
-  function lifetimeAddedSafe(monthlyRevenue, lifetime) {
-    return monthlyRevenue * lifetime;
   }
 
   var form = el("calc");
