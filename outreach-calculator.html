@@ -168,6 +168,11 @@
     });
   }
 
+  function fmtInt(n) {
+    if (!isFinite(n) || n < 0) n = 0;
+    return Math.round(n).toLocaleString("en-US");
+  }
+
   function fmtMoney(n) {
     if (!isFinite(n)) n = 0;
     var neg = n < 0;
@@ -182,11 +187,9 @@
     var node = el(id);
     if (!node) return;
     node.textContent = text;
-    if (tone === "warn") {
-      node.classList.remove("neutral");
-    } else if (tone === "neutral") {
-      node.classList.add("neutral");
-    }
+    node.classList.remove("neutral");
+    // single accent palette: any non-positive result drops to plain text, never a second colour
+    if (tone !== "accent") node.classList.add("neutral");
   }
 
   function run() {
@@ -227,16 +230,18 @@
     } else if (perEmail <= 0) {
       verdict = "Set reply, positive and close rates above zero to project clients.";
     } else {
-      var emailsPerClient = 1 / (WEEKS_PER_MONTH * perEmail);
-      var extra = Math.ceil(emailsPerClient - emails);
-      if (extra < 1) extra = 1;
+      // emails per week needed to win exactly one client per month at these rates
+      var emailsForOneClient = 1 / (WEEKS_PER_MONTH * perEmail);
+      // emails per week that buys one additional client per month
+      var stepUp = Math.max(1, Math.round(emailsForOneClient));
+      var needMore = Math.max(1, Math.ceil(emailsForOneClient - emails));
 
       if (clientsMonth < 1) {
-        verdict = "At these rates you need " + fmtCount(extra) +
+        verdict = "At these rates you need " + fmtInt(needMore) +
           " more emails per week to add one client a month.";
       } else {
         verdict = "At these rates you add about " + fmtCount(clientsMonth) +
-          " clients a month. " + fmtCount(extra) +
+          " clients a month. Roughly " + fmtInt(stepUp) +
           " more emails per week would add one more.";
       }
 
