@@ -10,7 +10,6 @@
     --muted: #5a616b;
     --line: #d9dde3;
     --bg: #ffffff;
-    --panel: #f6f7f9;
     --accent: #1f4e79;
     --warn-bg: #fdf7e6;
     --warn-line: #e3c97a;
@@ -208,6 +207,7 @@
   'use strict';
 
   var FIELDS = ['leads', 'deliverability', 'posreply', 'meetingrate', 'closerate', 'dealsize', 'sendingcost'];
+  var PERCENTS = { deliverability: 1, posreply: 1, meetingrate: 1, closerate: 1 };
 
   function el(id) {
     return document.getElementById(id);
@@ -218,6 +218,9 @@
     if (isNaN(v) || v < 0) {
       return 0;
     }
+    if (PERCENTS[id] && v > 100) {
+      return 100;
+    }
     return v;
   }
 
@@ -227,6 +230,14 @@
 
   function money(n) {
     return '$' + n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+  }
+
+  function moneyFine(n) {
+    var digits = n > 0 && n < 10 ? 2 : 0;
+    return '$' + n.toLocaleString('en-US', {
+      minimumFractionDigits: digits,
+      maximumFractionDigits: digits
+    });
   }
 
   function update() {
@@ -245,8 +256,8 @@
     el('out-revenue').textContent = money(revenue);
 
     if (meetings > 0) {
-      el('out-costpermeeting').textContent = money(cost / meetings);
-      el('out-revpermeeting').textContent = money(revenue / meetings);
+      el('out-costpermeeting').textContent = moneyFine(cost / meetings);
+      el('out-revpermeeting').textContent = moneyFine(revenue / meetings);
     } else {
       el('out-costpermeeting').textContent = 'n/a';
       el('out-revpermeeting').textContent = 'n/a';
