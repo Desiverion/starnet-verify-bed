@@ -18,29 +18,21 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.45}
   var log = [];
   function put(s) { log.push(s); out.textContent = log.join('\n'); }
 
-  var SCRIPT_URL = 'audit-outreach-calculator.py';
-  var PAGE_URL   = 'outreach-local.html';
-
   try {
     var py = await loadPyodide();
     put('python: ' + py.runPython('import sys; sys.version'));
     put('');
 
-    var scriptSrc = await (await fetch(SCRIPT_URL)).text();
-    var pageSrc   = await (await fetch(PAGE_URL)).text();
+    var scriptSrc = await (await fetch('audit-outreach-calculator.py')).text();
+    var pageSrc   = await (await fetch('outreach-local.html')).text();
     put('script bytes : ' + scriptSrc.length);
     put('page bytes   : ' + pageSrc.length);
 
     py.FS.writeFile('/audit-outreach-calculator.py', scriptSrc);
     py.FS.writeFile('/outreach-calculator.html', pageSrc);
 
-    put('page sha256  : ' + py.runPython(
-      'import hashlib; hashlib.sha256(open("/outreach-calculator.html","rb").read()).hexdigest()'
-    ));
-    put('');
-
     var result = py.runPython(`
-import io, sys, runpy, contextlib
+import io, sys, runpy, contextlib, hashlib
 sys.argv = ["audit-outreach-calculator.py", "/outreach-calculator.html"]
 buf = io.StringIO()
 code = None
@@ -49,7 +41,7 @@ with contextlib.redirect_stdout(buf):
         runpy.run_path("/audit-outreach-calculator.py", run_name="__main__")
     except SystemExit as e:
         code = e.code
-buf.getvalue() + "EXIT_CODE=%r" % (code,)
+"PAGE_SHA256=" + hashlib.sha256(open("/outreach-calculator.html","rb").read()).hexdigest() + "\\n" + buf.getvalue() + "EXIT_CODE=%r" % (code,)
 `);
     put(result);
     put('');
