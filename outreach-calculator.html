@@ -9,8 +9,8 @@
     --bg:#0b0b0e;
     --panel:#141419;
     --line:#26262e;
-    --text:#e8e6e1;
-    --muted:#8b8b96;
+    --text:#e7e5e0;
+    --muted:#8c8c96;
     --accent:#f0b429;
     --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
   }
@@ -22,17 +22,16 @@
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
     font-size:16px;
     line-height:1.55;
-    -webkit-font-smoothing:antialiased;
   }
-  .wrap{max-width:860px;margin:0 auto;padding:48px 20px 80px}
-  header{margin-bottom:44px}
-  h1{font-size:26px;font-weight:600;letter-spacing:-0.01em;margin:0 0 8px}
+  .wrap{max-width:760px;margin:0 auto;padding:56px 24px 96px}
+  header{margin-bottom:52px}
+  h1{font-size:26px;font-weight:600;letter-spacing:-0.01em;margin:0 0 10px}
   .sub{color:var(--muted);font-size:15px;margin:0}
-  section{margin-bottom:44px}
-  h2{font-size:12px;text-transform:uppercase;letter-spacing:0.12em;color:var(--muted);font-weight:600;margin:0 0 20px}
-  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:22px 26px}
-  .field{display:flex;flex-direction:column;gap:8px}
-  label{font-size:14px;color:var(--muted)}
+  section{margin-bottom:48px}
+  h2{font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);margin:0 0 22px;font-weight:600}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:24px 28px}
+  .field{display:flex;flex-direction:column;gap:9px}
+  label{font-size:13.5px;color:var(--muted)}
   input{
     width:100%;
     background:var(--panel);
@@ -41,32 +40,33 @@
     color:var(--text);
     font-family:var(--mono);
     font-size:16px;
-    padding:12px;
+    padding:13px;
     outline:none;
     -moz-appearance:textfield;
   }
   input::-webkit-outer-spin-button,
   input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
   input:focus{border-color:var(--accent)}
-  .outgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:2px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden}
-  .out{background:var(--panel);padding:22px 20px;display:flex;flex-direction:column;gap:6px}
-  .out .k{font-size:13px;color:var(--muted)}
-  .out .v{font-family:var(--mono);font-size:24px;letter-spacing:-0.01em;color:var(--accent);word-break:break-word}
-  .out .v.neutral{color:var(--text)}
+  .outgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .out{background:var(--panel);padding:24px 20px;display:flex;flex-direction:column;gap:8px}
+  .out .k{font-size:12.5px;color:var(--muted)}
+  .out .v{font-family:var(--mono);font-size:23px;letter-spacing:-0.01em;color:var(--accent);word-break:break-word}
+  .out .v.plain{color:var(--text)}
   .verdict{
     border-left:3px solid var(--accent);
     background:var(--panel);
     border-radius:0 10px 10px 0;
-    padding:20px 22px;
+    padding:22px 24px;
     font-size:17px;
-    line-height:1.6;
+    line-height:1.65;
     margin:0;
   }
-  .note{color:var(--muted);font-size:13px;margin:20px 0 0}
+  .note{color:var(--muted);font-size:12.5px;margin:22px 0 0;line-height:1.6}
   @media (max-width:520px){
-    .wrap{padding:32px 16px 56px}
+    .wrap{padding:36px 18px 64px}
     h1{font-size:22px}
-    .out .v{font-size:21px}
+    .out .v{font-size:20px}
+    .outgrid{grid-template-columns:1fr 1fr}
   }
 </style>
 </head>
@@ -119,20 +119,20 @@
   <section>
     <h2>What that produces</h2>
     <div class="outgrid">
-      <div class="out"><span class="k">Replies per week</span><span class="v neutral" id="outReplies">0</span></div>
-      <div class="out"><span class="k">Positive replies per week</span><span class="v neutral" id="outPositive">0</span></div>
+      <div class="out"><span class="k">Replies per week</span><span class="v plain" id="outReplies">0</span></div>
+      <div class="out"><span class="k">Positive replies per week</span><span class="v plain" id="outPositive">0</span></div>
       <div class="out"><span class="k">Clients won per month</span><span class="v" id="outClients">0</span></div>
       <div class="out"><span class="k">Monthly revenue added</span><span class="v" id="outMonthly">$0</span></div>
       <div class="out"><span class="k">Annual revenue added</span><span class="v" id="outAnnual">$0</span></div>
-      <div class="out"><span class="k">Lifetime value added per month of outreach</span><span class="v" id="outLifetime">$0</span></div>
-      <div class="out"><span class="k">Inbox cost per month</span><span class="v neutral" id="outCost">$0</span></div>
+      <div class="out"><span class="k">Client value over retainer lifetime</span><span class="v" id="outLifetime">$0</span></div>
+      <div class="out"><span class="k">Inbox cost per month</span><span class="v plain" id="outCost">$0</span></div>
       <div class="out"><span class="k">Net per month</span><span class="v" id="outNet">$0</span></div>
       <div class="out"><span class="k">Revenue per 1,000 emails sent</span><span class="v" id="outPerThousand">$0</span></div>
     </div>
     <p class="verdict" id="verdict" role="status" aria-live="polite"></p>
   </section>
 
-  <p class="note">Assumes 4.33 weeks per month. Revenue is new retainer value, not cash collected this month. Close rate is applied to positive replies.</p>
+  <p class="note">Assumes 4.33 weeks per month. Revenue is new retainer value, not cash collected this month. Close rate applies to positive replies. Client value is monthly revenue added times retainer lifetime.</p>
 
 </div>
 
@@ -161,8 +161,7 @@
   function fmtCount(n) {
     if (!isFinite(n)) n = 0;
     if (n === 0) return "0";
-    var abs = Math.abs(n);
-    var digits = abs >= 10 ? 0 : 1;
+    var digits = Math.abs(n) >= 10 ? 0 : 1;
     return n.toLocaleString("en-US", {
       minimumFractionDigits: digits,
       maximumFractionDigits: digits
@@ -184,13 +183,15 @@
     return (neg ? "-$" : "$") + s;
   }
 
-  function set(id, text, tone) {
+  function set(id, text, plain) {
     var node = el(id);
     if (!node) return;
     node.textContent = text;
-    node.classList.remove("neutral");
-    // single accent palette: any non-positive result drops to plain text, never a second colour
-    if (tone !== "accent") node.classList.add("neutral");
+    if (plain) {
+      node.classList.add("plain");
+    } else {
+      node.classList.remove("plain");
+    }
   }
 
   function run() {
@@ -208,20 +209,20 @@
     var clientsMonth = positiveWeek * WEEKS_PER_MONTH * cr;
     var monthlyRevenue = clientsMonth * retainer;
     var annualRevenue = monthlyRevenue * 12;
-    var lifetimeAdded = monthlyRevenue * lifetime;
+    var lifetimeValue = monthlyRevenue * lifetime;
     var costMonth = inboxes * costPerInbox;
     var net = monthlyRevenue - costMonth;
     var perThousand = 1000 * rr * pr * cr * retainer;
 
-    set("outReplies", fmtCount(repliesWeek), "neutral");
-    set("outPositive", fmtCount(positiveWeek), "neutral");
-    set("outClients", fmtCount(clientsMonth));
-    set("outMonthly", fmtMoney(monthlyRevenue));
-    set("outAnnual", fmtMoney(annualRevenue));
-    set("outLifetime", fmtMoney(lifetimeAdded));
-    set("outCost", fmtMoney(costMonth), "neutral");
-    set("outNet", fmtMoney(net), net < 0 ? "warn" : "accent");
-    set("outPerThousand", fmtMoney(perThousand));
+    set("outReplies", fmtCount(repliesWeek), true);
+    set("outPositive", fmtCount(positiveWeek), true);
+    set("outClients", fmtCount(clientsMonth), false);
+    set("outMonthly", fmtMoney(monthlyRevenue), false);
+    set("outAnnual", fmtMoney(annualRevenue), false);
+    set("outLifetime", fmtMoney(lifetimeAddedSafe(monthlyRevenue, lifetime)), false);
+    set("outCost", fmtMoney(costMonth), true);
+    set("outNet", fmtMoney(net), net < 0);
+    set("outPerThousand", fmtMoney(perThousand), false);
 
     var perEmail = rr * pr * cr;
     var verdict;
@@ -231,9 +232,7 @@
     } else if (perEmail <= 0) {
       verdict = "Set reply, positive and close rates above zero to project clients.";
     } else {
-      // emails per week needed to win exactly one client per month at these rates
       var emailsForOneClient = 1 / (WEEKS_PER_MONTH * perEmail);
-      // emails per week that buys one additional client per month
       var stepUp = Math.max(1, Math.round(emailsForOneClient));
       var needMore = Math.max(1, Math.ceil(emailsForOneClient - emails));
 
@@ -255,6 +254,10 @@
 
     var vnode = el("verdict");
     if (vnode) vnode.textContent = verdict;
+  }
+
+  function lifetimeAddedSafe(monthlyRevenue, lifetime) {
+    return monthlyRevenue * lifetime;
   }
 
   var form = el("calc");
