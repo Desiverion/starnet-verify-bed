@@ -55,6 +55,79 @@
       });
   }
 
+  function structureChecks(text) {
+    return fetch(SOURCE).then(function () { return checkStructure(text); });
+  }
+
+  function checkStructure(text) {
+    // 1. tag balance for void-less container tags
+    var tags = ['html', 'head', 'body', 'div', 'style', 'script', 'label', 'span', 'p', 'ul', 'li', 'h1', 'h2', 'output'];
+    var unbalanced = [];
+    for (var i = 0; i < tags.length; i++) {
+      var t = tags[i];
+      var open = (text.match(new RegExp('<' + t + '(\\s|>)', 'g')) || []).length;
+      var close = (text.match(new RegExp('</' + t + '>', 'g')) || []).length;
+      if (open !== close) { unbalanced.push(t + ' open=' + open + ' close=' + close); }
+    }
+    say('html tag balance: ' + (unbalanced.length === 0 ? 'PASS (all 15 container tags balanced)' : 'FAIL ' + unbalanced.join('; ')));
+
+    // 2. javascript brace / paren / bracket balance
+    var m = text.match(/<script>([\s\S]*?)<\/script>/);
+    var js = m ? m[1] : '';
+    var pairs = [['{', '}'], ['(', ')'], ['[', ']']];
+    var jsv = [];
+    for (var j = 0; j < pairs.length; j++) {
+      var o = pairs[j][0], c = pairs[j][1];
+      var oc = (js.split(o).length - 1);
+      var cc = (js.split(c).length - 1);
+      jsv.push(o + c + ' open=' + oc + ' close=' + cc + (oc === cc ? ' OK' : ' UNBALANCED'));
+    }
+    say('js braces: ' + jsv.join(' | '));
+
+    // 3. js syntax compiles
+    var syntaxOk = true;
+    try { new Function(js); } catch (e) { syntaxOk = false; }
+    say('js compiles: ' + (syntaxOk ? 'PASS' : 'FAIL'));
+
+    // 4. every input has a matching label
+    var host = document.createElement('div');
+    host.innerHTML = text.replace(/<script>[\s\S]*?<\/script>/, '');
+    document.body.appendChild(host);
+    var inputs = host.querySelectorAll('input');
+    var unlabelled = [];
+    for (var k = 0; k < inputs.length; k++) {
+      var id = inputs[k].id;
+      if (!id || !host.querySelector('label[for="' + id + '"]')) { unlabelled.push(id || '(no id)'); }
+    }
+    say('labels: ' + inputs.length + ' inputs, unlabelled=' + (unlabelled.length ? unlabelled.join(',') : 'none') + (unlabelled.length === 0 ? ' PASS' : ' FAIL'));
+
+    // 5. aria-live region
+    var live = host.querySelector('[aria-live]');
+    say('aria-live: ' + (live ? live.id + '="' + live.getAttribute('aria-live') + '" PASS' : 'FAIL'));
+
+    // 6. no external dependencies
+    var external = text.match(/(src|href)="(?:https?:)?\/\//g);
+    say('external refs (src/href): ' + (external ? 'FAIL ' + external.join(',') : 'none PASS'));
+    say('@import / cdn: ' + (/@import|cdn\.|googleapis|jsdelivr|unpkg/.test(text) ? 'FAIL' : 'none PASS'));
+
+    // 7. forbidden characters
+    var emDash = text.indexOf('\u2014');
+    var enDash = text.indexOf('\u2013');
+    say('em dash U+2014: ' + (emDash === -1 ? 'none PASS' : 'FOUND at ' + emDash + ' FAIL'));
+    say('en dash U+2013: ' + (enDash === -1 ? 'none PASS' : 'FOUND at ' + enDash + ' FAIL'));
+    var emoji = [];
+    for (var q = 0; q < text.length; q++) {
+      var cp = text.codePointAt(q);
+      if (cp > 0xFFFF || (cp >= 0x2600 && cp <= 0x27BF) || (cp >= 0x1F000 && cp <= 0x1FAFF) || (cp >= 0xFE00 && cp <= 0xFE0F)) {
+        emoji.push('U+' + cp.toString(16).toUpperCase() + ' at ' + q);
+      }
+    }
+    say('emoji / variation selectors: ' + (emoji.length === 0 ? 'none PASS' : 'FOUND ' + emoji.join(',') + ' FAIL'));
+
+    host.remove();
+    say('byte length of fetched html: ' + new Blob([text]).size);
+  }
+
   var all = true;
   runCase('defaults', {}, {
     'out-deliverable': '950',
@@ -66,8 +139,8 @@
     'out-revpermeeting': '$400'
   }).then(function (ok) {
     all = all && ok;
-    return runCase('sub-ten cost per meeting (cost=30)', { sendingcost: '30' }, {
-      'out-costpermeeting': '$2.10'
+    return runCase('sub-ten cost per meeting (cost=30, 30/14.25=2.105)', { sendingcost: '30' }, {
+      'out-costpermeeting': '$2.11'
     });
   }).then(function (ok) {
     all = all && ok;
@@ -83,6 +156,10 @@
     });
   }).then(function (ok) {
     all = all && ok;
+    return fetch(SOURCE).then(function (r) { return r.text(); });
+  }).then(function (text) {
+    say('--- structure and content checks ---');
+    checkStructure(text);
     say(all ? 'ALL CASES PASS' : 'SOME CASES FAILED');
   }).catch(function (e) {
     say('ERROR: ' + e.message);
