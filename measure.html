@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>measure</title>
+</head>
+<body>
+<pre id="log">running</pre>
+<script>
+(function () {
+  'use strict';
+  var SOURCE = 'https://raw.githubusercontent.com/Desiverion/starnet-verify-bed/main/outreach-calculator.html';
+  var log = document.getElementById('log');
+  fetch(SOURCE).then(function (r) { return r.text(); }).then(function (t) {
+    var lines = t.split('\n');
+    var nonAscii = [];
+    for (var i = 0; i < t.length; i++) {
+      var c = t.charCodeAt(i);
+      if (c > 127) { nonAscii.push(i); }
+    }
+    var out = [];
+    out.push('chars: ' + t.length);
+    out.push('utf8 bytes: ' + new Blob([t]).size);
+    out.push('lines: ' + lines.length);
+    out.push('trailing newline: ' + (t.charAt(t.length - 1) === '\n'));
+    out.push('crlf present: ' + (t.indexOf('\r') !== -1));
+    out.push('non-ascii positions: ' + (nonAscii.length === 0 ? 'none' : nonAscii.join(',')));
+    out.push('line 13: [' + lines[12] + '] len=' + lines[12].length);
+    out.push('line 33: [' + lines[32] + '] len=' + lines[32].length);
+    out.push('line 276: [' + lines[275] + '] len=' + (lines[275] === undefined ? 'MISSING' : lines[275].length));
+    log.textContent = out.join('\n');
+  });
+})();
+</script>
+</body>
+</html>
